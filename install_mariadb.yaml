@@ -1,0 +1,5 @@
+---
+- name: Try to install mariadb ob Debian 11
+  hosts: plesk.yhoro.de
+  roles:
+    - mariadb
