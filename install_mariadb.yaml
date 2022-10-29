@@ -1,5 +1,7 @@
 ---
 - name: Try to install mariadb ob Debian 11
   hosts: plesk.yhoro.de
+  vars_prompt:
+    - name: bitte eine
   roles:
     - mariadb

@@ -1,0 +1,60 @@
+---
+- name: zwei listen definieren
+  set_fact:
+    useradd: []
+    failed : []
+    preuseradd: []
+#- name: debug
+#  debug:
+#    msg: "item {{ item }}"
+#  loop: "{{ user }}"
+
+- name: falls der User nicht vorhanden ist wird er geedet
+  block:
+
+    - name: alles holen
+      getent:
+        database: passwd
+        key: "{{ item['vhost_user'] }}"
+      loop: "{{ user}}"
+      register: passwd
+  rescue:
+    - name: Add a system_user
+      user:
+        name: "{{ item['vhost_user'] }}"
+        group: "{{ item['vhost_group'] }}"
+        shell: /usr/sbin/nologin
+        #umask: 0027 # eventuell die other lesen geben also die 0022
+      loop: "{{ user}}"
+      loop_control:
+        index_var: i
+      register: result
+    - name: add user in a list
+      set_fact:
+        useradd: "{{ useradd + [ result.results[i].item.vhost_user ] }}"
+      loop: "{{ user}}"
+      loop_control:
+        index_var: i
+      when: result.results[i].changed is true
+
+
+- name: Show gathered local user names only
+  debug:
+      msg: "{{ item }}"
+  loop: "{{ getent_passwd.keys() | list }}"
+  when: ansible_check_mode
+
+#- name: jetzt wird die variable passwd endeckt
+ # debug:
+ #   var: ansible_facts.getent_services
+
+
+
+
+- name: Das sind die hinzugefügten Nuter
+  debug:
+    msg: "Das sins die hinzugefügten Nutzer {{ useradd }}"
+
+
+
+

@@ -1,57 +1,77 @@
-- name:
-  set_facts:
-    php_default_version_debian: "{{ __php_default_version_debian}}"
-  when: php_default_version_debian is not defined
+# facts holen
+- package_facts:
+    manager: auto
+#######################
 
-- name: Define php_packages
-  set_fact:
-    php_packages: "{{ __php_packages | list }}"
-  when: php_packages is not defined
+- name: Check whether a package called apache is installed
+  debug:
+    msg: "Der {{ansible_facts.packages[ 'apache2' ][0]['name'] }} >
+    in der Version {{ansible_facts.packages[ 'apache2' ][0]['version'].split('-')[0] }} ist schon installiert "
+  when: "'apache2' in ansible_facts.packages"
 
-- name: Define php_webserver_daemon.
-  set_fact:
-    php_webserver_daemon: "{{ __php_webserver_daemon }}"
-  when: php_webserver_daemon is not defined
+- name: install apache2
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    name: apache2
+    state: present
+  when: "'apache2' not in ansible_facts.packages"
+  register: installed
+- package_facts:
+    manager: auto
+  when: installed is not skipped
 
-- name: Define php_conf_paths.
-  set_fact:
-    php_conf_paths: "{{ __php_conf_paths }}"
-  when: php_conf_paths is not defined
+- debug:
+    msg: "Der Webserver {{ ansible_facts.packages[ 'apache2' ][0]['name'] }} >
+     mit der Version  {{ ansible_facts.packages['apache2'][0]['version'].split('~')[0] }} wurde erfolgreich vorinstalliert"
+  when:  installed  is not skipped
+###################
+- pause:
+    prompt: Möchten Module hinzufügen
+    echo: yes
+  register: mod_enable
+####### nur für testzwecken
+#- debug:
+#    msg: Das ist in der variable mod_enable {{ mod_enable.user_input }}
+#  when: mod_enable.user_input == 'yes'
+##########################################
+- name: blocks testen für Error handling
+  block:
+    - name: Enable the apache2 module im block_modus
+      community.general.apache2_module:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - "{{ apache_mods }}"
+      when: (mod_enable.user_input == 'yes' or 'y') and apache_mods is defined
+      register: fail
+#      ignore_errors: yes
+  rescue:
+    - name: Debug für block
+      debug:
+        msg: "Bitte Prüfe die Module, die du angegeben hast , ein Modul wurde nicht gefunden"
 
-- name: Define php_extension_conf_paths.
-  set_fact:
-    php_extension_conf_paths: "{{ __php_extension_conf_paths }}"
-  when: php_extension_conf_paths is not defined
 
-- name: Define php_apc_conf_filename.
-  set_fact:
-    php_apc_conf_filename: "{{ __php_apc_conf_filename }}"
-  when: php_apc_conf_filename is not defined
 
-- name: Define php_opcache_conf_filename.
-  set_fact:
-    php_opcache_conf_filename: "{{ __php_opcache_conf_filename }}"
-  when: php_opcache_conf_filename is not defined
 
-- name: Define php_fpm_conf_path.
-  set_fact:
-    php_fpm_conf_path: "{{ __php_fpm_conf_path }}"
-  when: php_fpm_conf_path is not defined
 
-# Setup/install tasks.
 
-- include_tasks: setup-Debian.yml
-  when:
-    - not php_install_from_source
-    - ansible_os_family == 'Debian'
 
-# Install PHP from source when php_install_from_source is true.
-- include_tasks: install-from-source.yml
-  when: php_install_from_source
 
-# Configure PHP.
-- include_tasks: configure.yml
-- include_tasks: configure-apcu.yml
-- include_tasks: configure-opcache.yml
-- include_tasks: configure-fpm.yml
+
+
+######################################################
+#- name: Enable the apache2 module
+#  community.general.apache2_module:
+#    name: "{{ item }}"
+#    state: present
+#  with_items:
+#    - "{{ apache_mods }}"
+#  when: (mod_enable.user_input == 'yes' or 'y') and apache_mods is defined
+#  register: fail
+
+# für den Fall dass die Variable apache_mods nicht gesetzt ist
+- debug:
+    msg: "Bitte die variable apache_mods als eine Liste nutzen um ein oder mehrere Module laden"
+  when: (apache_mods is undefined) and (mod_enable.user_input == 'yes' or 'y')
 

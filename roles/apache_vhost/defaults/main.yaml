@@ -1,0 +1,59 @@
+
+
+apache_conf_path: /etc/apache2
+apache_default_vhost_filename: 000-default.conf 
+vhost_listen_ip: "*"
+vhost_listen_port: 80
+vhost_listen_port_ssl: 443
+
+  #apache_create_vhosts: true
+
+vhost_user: www-data
+vhost_group: www-data
+vhost_mode: 0644
+apache_remove_default_vhost: false
+apache_global_vhost_settings: |
+  DirectoryIndex index.php index.html
+
+
+vhosts_servername:  horo.de
+vhosts_serveralias:  mail.horo.de
+vhosts_admin: admin@yhoro.de
+  #dditional properties:
+  #'serveradmin, serveralias, allow_override, options, extra_parameters'.
+vhosts_documentroot: "/var/www/{{ vhosts_servername }}"
+
+
+#vhosts_filename: "{{ vhosts.servername }}.conf"
+#vhosts_templates: "vhosts.conf.j2"
+vhost_allow_override: "All"
+vhost_options: "Indexes FollowSymLinks"
+
+vhost_vhosts_ssl: []
+
+
+
+
+
+apache_ignore_missing_ssl_certificate: true
+apache_state: started
+apache_enabled: yes
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

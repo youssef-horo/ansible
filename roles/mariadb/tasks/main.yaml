@@ -1,11 +1,13 @@
 ---
-- name:
-  package_facts:
+- package_facts:
     manager: auto
+
 - name: show installed packages
   debug:
-    msg: Der "{{ ansible_facts.packages['mariadb-server'][0]['name'] }}" ist schon installiert
+    msg: Der "{{ ansible_facts.packages[ item ][0]['name'] }}" ist schon installiert
   when: "'mariadb-server' in ansible_facts.packages"
+  with_items:
+    - {{ packages }}
 
 
 - apt:
@@ -14,6 +16,8 @@
     name: "{{ mariadb_packages }}"
     state: present
   when: "'mariadb-server' not in ansible_facts.packages"
+  with_items:
+    - {{  }}
   register: installed
 
 - name: show installed packages
@@ -22,3 +26,4 @@
   when: installed is not skipped
 
 - include_tasks: secur_installation.yaml
+  when: "'mariadb-server' in ansible_facts.packages"

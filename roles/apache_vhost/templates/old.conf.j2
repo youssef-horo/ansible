@@ -1,0 +1,32 @@
+{% if item['hosts_serveralias'] is defined %}
+    ServerAlias {{ item['hosts_serveralias'] }}
+{% endif %}
+
+
+
+{% if item['vhosts_documentroot'] is defined %}
+    DocumentRoot "{{ item['vhosts_documentroot'] }}"
+{% else %}
+    DocumentRoot "/var/www/{{ item['vhosts_servername'] }}"
+{% endif %}
+
+{% if item['vhosts_serveradmin'] is defined %}
+  ServerAdmin {{ item['vhosts_serveradmin'] }}
+
+{% endif %}
+  <FilesMatch ".php$">
+{% if item['php_version'] is defined %}
+    SetHandler "proxy:unix:/var/run/php/{item['php_version']}-fpm.sock| fcgi://localhost/"
+{% else %}
+  SetHandler "proxy:unix:/var/run/php/php7.4-fpm.sock| fcgi://localhost/"
+{% endif %}
+  </FilesMatch>
+
+  <Directory "/var/www/{{ item[ vhosts_servername ]}}">
+    AllowOverride {{ vhosts_allow_override | default(vhost_allow_override) }}
+    Options {{ item[ vhosts_options ] | default(vhost_options) }}
+    Require all granted
+  </Directory>
+{% if vhost_extra_parameters is defined %}
+{{ item[ vhost_extra_parameters ]| indent(width=2, first=True) }}
+{% endif %}

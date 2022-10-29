@@ -1,0 +1,73 @@
+- include_tasks: create_user.yaml
+# Cheken ob apache2 schon installiert ist
+- package_facts:
+    manager: auto
+- name: Check whether a package called apache is installed
+  debug:
+    msg: "Der {{ansible_facts.packages['apache2'][0]['name'] }} >
+    in der Version {{ansible_facts.packages['apache2'][0]['version'].split('-')[0] }} ist schon installiert "
+  when: "'apache2' in ansible_facts.packages"
+# Löschen die Defaults Seite
+- name: Remove default vhost in sites-enabled.
+  file:
+    path: "/etc/apache2/sites-enabled/{{ apache_default_vhost_filename }}"
+    state: absent
+
+- debug:
+    msg: "{{ item['vhost_servername'] }}"
+  loop: "{{ user}}"
+
+
+- name: Add apache vhost configuration. 
+  template:
+    src: "vhosts.conf.j2"
+    dest: "/etc/apache2/sites-available/{{ item['vhost_servername'] }}.conf"
+    owner: "{{ item['vhost_user'] }}"
+    group: "{{ item['vhost_group'] }}"
+    mode: "{{ vhost_mode }}"
+  loop: "{{ user }}"
+
+
+- name:
+  command: apachectl configtest
+  register: conftest
+
+- name: Add vhost symlink in sites-enabled.
+  file:
+    src: /etc/apache2/sites-available/{{ item['vhost_servername'] }}.conf
+    dest: /etc/apache2/sites-enabled/{{ item['vhost_servername'] }}.conf
+    state: link
+    mode: "{{ vhost_mode }}"
+  loop: "{{ user }}"
+  notify: restart apache
+
+
+- name: Create a Directory for the vhost
+  include_tasks: create-directory.yaml
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,120 @@
+---
+- name: falls eine liste gesetzt ist
+  set_fact:
+    packages: "{{ packages_list | join(',')}}"
+  when: packages_list is defined
+
+- name: zwei listen definieren
+  set_fact:
+    installed: []
+    failed : []
+    preinstalled: []
+
+
+# man könnte spezifischer werden und apt angeben
+- package_facts:
+    manager: auto
+# durchsuchen die vorhandenen installierten Packages
+#- name: Check whether the packages is installed
+#  debug:
+#    msg: " >
+#    Der {{ansible_facts.packages[ item ][0]['name'] }} >
+#    in der Version {{ansible_facts.packages[ item ][0]['version'].split('-')[0] }} ist schon vorinstalliert "
+#  register: not_installed
+#  when: item in ansible_facts.packages
+#  loop: "{{ packages.split(',') }}"
+
+- name: Hizufügen der vorinstallieren packete
+  set_fact:
+    preinstalled: "{{ preinstalled + [ ansible_facts.packages[ item ][0]['name'] ] }}"
+  register: not_installed
+  when: item in ansible_facts.packages
+  loop: "{{ packages.split(',') }}"
+# die loop_control prüfen wie die funktioniert
+#- debug:
+#    msg: "Das ist in der variable {{ not_installed.results[i].skipped  }}"
+#  register: result
+#  when: not_installed.results[i].skipped is true
+#  loop: "{{ packages.split(',') }}"
+#  loop_control:
+#    index_var: i
+
+# jetzt erfolt die tatsächliche Installation der nicht vorinstallieren packages
+
+- name: apt update the repo and install all packages
+  block:
+    - name: apt update the repo and install all packages when is not installed
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+        name: "{{ item }}"
+        state: present
+      when: not_installed.results[i].skipped is true
+      loop: "{{ packages.split(',') }}"
+      loop_control:
+        loop_var: item
+        index_var: i
+      register: fail_to_install
+
+  always:
+#    - name: das ist ein test
+#      debug:
+#        msg: "das Packet ({{ fail_to_install.results[i].item }}) wurde erfolgreich installiert "
+#      when: fail_to_install.results[i].changed is true
+#      loop: "{{ packages.split(',') }}"
+#      loop_control:
+#        loop_var: item
+#        index_var: i
+#      register: success_installed
+#    - name: Falls ein packet nicht available ist
+#      debug:
+#        msg: "Bitte überprüfe deine Angabe das Paket ({{ fail_to_install.results[i].item }}) wurde nicht gefunden"
+#      loop: "{{ packages.split(',') }}"
+#      loop_control:
+#        loop_var: item
+#        index_var: i
+#      when: fail_to_install.results[i].failed is true
+    - name: hinzufügen der installieren packages in einer Liste
+      set_fact:
+        installed: "{{ installed + [ fail_to_install.results[i].item ] }}"
+      when: fail_to_install.results[i].changed is true
+      loop: "{{ packages.split(',') }}"
+      loop_control:
+        loop_var: item
+        index_var: i
+      register: success_installed
+  rescue:
+    - name: Hizufügen der fehlgeschlagenen installation in einer Liste
+      set_fact:
+        failed: "{{ failed + [ fail_to_install.results[i].item ] }}"
+      loop: "{{ packages.split(',') }}"
+      loop_control:
+        loop_var: item
+        index_var: i
+      when: fail_to_install.results[i].failed is true
+
+- package_facts:
+    manager: auto
+
+# Ich muss noch genau den Packet der nicht installiert wurde
+- name: Diese Packete sind schon vorinstalliert
+  debug:
+    msg: "VORINSTALLIERTE PACKETE {{ item }} <
+    IN DER VERSION {{ansible_facts.packages[ item ][0]['version'].split('-')[0] }}"
+  when: preinstalled | length>0
+  loop: "{{ preinstalled }}"
+
+- name: Diese packete wurden installiert
+  debug:
+    msg: "DIESE PACKETE {{ item }} >
+    IN DER VERSION {{ansible_facts.packages[ item ][0]['version'] }} WURDEN ERFOLGREICH INSTALLIERT "
+  when: installed | length>0
+  loop: "{{ installed }}"
+- name: Bei diesen Paketen ist die Installation fehlgeschlagen
+  debug:
+    msg: "FEHLGESCHLAGENE INSTALLATION ({{ item }})"
+  when: failed | length>0
+  loop: "{{ failed }}"
+
+
+#   eventuell eine email benachrichtigung für die installierten packete

@@ -1,0 +1,17 @@
+---
+- name: try to create on or more vhosts
+  hosts: plesk.yhoro.de
+  vars:
+    user:
+      - vhost_user: "BP-123-eu"
+        vhost_group: "{{ vhosts_group }}"
+        vhost_servername: "test.yhoro.org"
+        vhost_alias: "test.yhoro.org"
+
+      - vhost_user: "BP-987-eu"
+        vhost_group: "{{ vhosts_group }}"
+        vhost_servername: "test.yhoro.eu"
+        vhost_alias: "test.yhoro.eu"
+  roles:
+    - apache2
+    - apache_vhost
