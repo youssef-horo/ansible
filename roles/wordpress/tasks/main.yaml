@@ -1,0 +1,60 @@
+
+- name: Eine Datenbank für wordpress
+  mysql_db:
+    name: wp_{{ item | regex_replace('\.', '_') }}
+  loop: "{{ user | map(attribute='vhost_servername')}}"
+# habe hier ein gehaschtes password benutzet
+- name: create a user for php
+  mysql_user:
+    name: wp_{{ item | regex_replace('\.', '_') }}_user
+    host: localhost
+    password: '*0F3704CF78312459ABAEBE40557BFF7BFCB0A3EC'
+    encrypted: yes
+    priv: wp_{{ item | regex_replace('\.', '_') }}.*:ALL,GRANT
+    state: present
+  loop: "{{ user | map(attribute='vhost_servername')}}"
+
+- name: copy wordpress to DokumeentRoot
+  copy:
+    src: /root/wordpress/
+    dest: /var/www/vhosts/{{ item }}/httpdocs
+    remote_src: true
+    directory_mode:
+    owner: www-data
+    group: www-data
+    mode: 0744
+  loop: "{{ user | map(attribute='vhost_servername')}}"
+
+- name:
+  template:
+    src: "wp-config.php.j2"
+    dest: "/var/www/vhosts/{{ item }}/httpdocs/wp-config.php"
+    owner: www-data
+    group: www-data
+    mode: 0644
+  loop: "{{ user | map(attribute='vhost_servername')}}"
+
+- file:
+    path: "/var/www/vhosts/{{ item }}/logs"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: 0744
+  loop: "{{ user | map(attribute='vhost_servername')}}"
+
+- name: Add apache vhost configuration.
+  template:
+    src: "vhosts.conf.j2"
+    dest: /etc/apache2/sites-available/{{ item.vhost_servername }}.conf
+    owner: www-data
+    group: www-data
+    mode: 0644
+  loop: "{{ user }}"
+
+- name: Add vhost symlink in sites-enabled.
+  file:
+    src: /etc/apache2/sites-available/{{ item.vhost_servername }}.conf
+    dest: /etc/apache2/sites-enabled/{{ item.vhost_servername }}.conf
+    state: link
+  loop: "{{ user }}"
+  notify: restart apache

@@ -1,6 +1,0 @@
----
-- name: Removes all anonymous user accounts
-  community.mysql.mysql_user:
-    name: ''
-    host_all: yes
-    state: absent

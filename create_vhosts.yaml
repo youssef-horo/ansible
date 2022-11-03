@@ -3,15 +3,17 @@
   hosts: plesk.yhoro.de
   vars:
     user:
-      - vhost_user: "BP-123-eu"
+      - vhost_user: "BP-555"
         vhost_group: "{{ vhosts_group }}"
-        vhost_servername: "test.yhoro.org"
-        vhost_alias: "test.yhoro.org"
+        vhost_servername: "info.yhoro.de"
+        vhost_alias: "info.yhoro.org"
+        vhost_fpm_version: "php7.4-fpm"
 
-      - vhost_user: "BP-987-eu"
+      - vhost_user: "BP-333"
         vhost_group: "{{ vhosts_group }}"
-        vhost_servername: "test.yhoro.eu"
-        vhost_alias: "test.yhoro.eu"
+        vhost_servername: "eu.yhoro.de"
+        vhost_alias: "eu.yhoro.de"
+        vhost_fpm_version: "php8.0-fpm"
   roles:
     - apache2
     - apache_vhost

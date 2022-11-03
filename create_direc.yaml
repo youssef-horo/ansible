@@ -1,0 +1,4 @@
+- name: test
+  hosts: plesk.yhoro.de
+  roles:
+    - create_directory

@@ -1,0 +1,31 @@
+# Check if mariadb installed
+- package_facts:
+    manager: auto
+
+- name: "Prüfen ob der {{ item }} schon vorinstalliert ist "
+  debug:
+    msg: "Der Paket {{ item }} ist schon vorinstalliert "
+  when: item in ansible_facts.packages
+  with_items: "{{ packages }}"
+
+######################################
+- name: "install the package {{ item }}"
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    name: "{{ packages }}"
+    state: present
+  when: item not in ansible_facts.packages
+  register: installed
+  with_items: "{{ packages }}"
+
+
+# für den Fall dass die Installation durchgeführt wird eine bestätigung welche Version genau installiert wurde
+- package_facts:
+    manager: auto
+  when: installed is not skipped
+
+- debug:
+    msg: "Der Paket {{ item }} wurde erfolgreich installiert"
+  when:  installed is not skipped
+  with_items: "{{ packages }}"

@@ -1,0 +1,27 @@
+
+;
+;Sinnvoll wäre die variablen
+;listen.allowed_clients
+;static - die Anzahl der Kindprozesse ist fest eingestellt (pm.max_children).
+
+
+[{{ users.vhost_servername }}]
+user = {{ users.vhost_user }}
+group = {{ users.vhost_group }}
+{% if users.vhost_fpm_version is defined %}
+listen = /var/run/php/{{ users.vhost_fpm_version }}-{{ users.vhost_servername }}.sock
+{% else %}
+listen = /var/run/php/php7.4-fpm-{{ users.vhost_servername }}.sock
+{% endif %}
+
+listen.owner = www-data
+listen.group = www-data
+pm = dynamic
+
+pm.max_children = 5
+pm.start_servers = 2
+pm.min_spare_servers = 1
+pm.max_spare_servers = 3
+
+access.log = /var/log/php-fpm/$pool.access
+access.format = "%R %u [%t] \"%m %r\" %s %d %l"

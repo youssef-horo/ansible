@@ -1,0 +1,10 @@
+---
+- name: create file
+  file:
+    path: "/var/www/yhoro.org"
+    state: directory
+- name: create a user
+  user:
+    name: yhoro
+    state: present
+

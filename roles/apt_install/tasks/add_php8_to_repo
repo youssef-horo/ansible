@@ -1,0 +1,16 @@
+- name:
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    pkg:
+        - ca-certificates
+        - apt-transport-https
+        - software-properties-common
+    state: present
+
+- name:
+  command: echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/sury-php.list ; wget -qO - https://packages.sury.org/php/apt.gpg | apt-key add -
+
+- name:
+  apt:
+    update_cache: yes

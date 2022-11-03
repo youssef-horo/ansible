@@ -1,0 +1,14 @@
+---
+
+- name: Löschen der Anonymous MariaDB User
+  mysql_user:
+    name: ""
+    state: absent
+- name: Löschen der Test Datenbank
+  mysql_db:
+    name: "test"
+    state: absent
+  register: mysql_secure
+
+
+# anonymous benutzer löschen und test datenbank

@@ -1,6 +1,6 @@
 ---
 - name: try to install a package
-  hosts: db-horo.meap.local
+  hosts: plesk.yhoro.de
 #Die Variablen entweder als eine Liste in packages_list als variable
 #oder als ein string in packages als variable zB packages: "vim,haha"
 #Die variablen können dann per Host in den host_vars definiert werden oder direkt hier
@@ -13,12 +13,13 @@
 # Über fehlerhal
   vars:
     #packages: "vim,haha"
-    #packages_list:
+    packages_list:
       #- vim
       #- haha
       #- bash-completion
       #- nano
       #- test
-      #- net-tools
+      - net-tools
+      - php8.0
   roles:
     - apt_install

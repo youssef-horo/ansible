@@ -1,0 +1,65 @@
+<VirtualHost *:80>
+    ServerName {{ item.vhost_servername }}
+    ServerAlias {{ item.vhost_servername }}
+
+{% if item.vhost_documentroot is defined %}
+    DocumentRoot "{{ vhost_documentroot }}"
+{% else %}
+    DocumentRoot "/var/www/vhosts/{{ item.vhost_servername }}/httpdocs"
+{% endif %}
+
+{% if vhost_serveradmin is defined %}
+  ServerAdmin {{ vhost_serveradmin }}
+{% endif %}
+
+    ErrorLog "/var/www/vhosts/{{ item.vhost_servername }}/logs/apache_error.log"
+    CustomLog /var/www/vhosts/{{ item.vhost_servername }}/logs/access.log combined
+
+
+<Proxy "unix:/var/run/php/php7.4-fpm.sock|fcgi://localhost">
+   ProxySet timeout=300
+</Proxy>
+
+
+<FilesMatch \.php$>
+   SetHandler "proxy:fcgi://localhost"
+</FilesMatch>
+
+  <Directory "/var/www/vhosts/{{ item.vhost_servername }}/httpdocs/">
+    AllowOverride ALL
+
+  </Directory>
+
+</VirtualHost>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

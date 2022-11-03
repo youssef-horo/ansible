@@ -1,8 +1,26 @@
 ---
 
 
-- name: restart apache
-  service:
+- name:
+  command: apachectl configtest
+  register: apache_conftest
+  listen: restart apache
+- service:
     name: "apache2"
     state: "restarted"
-  when: conftest is succeeded
+  when: apache_conftest is succeeded
+  listen: restart apache
+
+
+- command: "php-fpm7.4 -t"
+  register: fpm_conftest
+  #loop: "{{ user | map(attribute='vhost_fpm_version')}}"
+  listen: restart fpm
+
+
+- service:
+    name: "{{ item }}"
+    state: "restarted"
+  when: fpm_conftest is succeeded
+  loop: "{{ user | map(attribute='vhost_fpm_version')}}"
+  listen: restart fpm

@@ -1,29 +1,10 @@
----
-- package_facts:
-    manager: auto
+# für die Installation von MariaDB am besten die apt_install rolle benutzen
+- include_tasks: install_mariadb.yaml
+  when: packages_list is undefined
 
-- name: show installed packages
-  debug:
-    msg: Der "{{ ansible_facts.packages[ item ][0]['name'] }}" ist schon installiert
-  when: "'mariadb-server' in ansible_facts.packages"
-  with_items:
-    - {{ packages }}
+- include_tasks: secure_installation.yaml
 
 
-- apt:
-    update_cache: yes
-    cache_valid_time: 3600
-    name: "{{ mariadb_packages }}"
-    state: present
-  when: "'mariadb-server' not in ansible_facts.packages"
-  with_items:
-    - {{  }}
-  register: installed
 
-- name: show installed packages
-  debug:
-    msg: Der "{{ ansible_facts.packages['mariadb-server'] [0]['name']}}" wurde erfolgreich installiert "{{ ansible_facts.packages['mariadb-server'] [0]['version']}}"
-  when: installed is not skipped
 
-- include_tasks: secur_installation.yaml
-  when: "'mariadb-server' in ansible_facts.packages"
+- include_tasks: configure.yaml

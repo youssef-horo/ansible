@@ -1,23 +1,26 @@
-- name: Check if the vhost directory exists
-  stat:
-    path: "/var/www/{{ item['vhost_servername'] }}"
-  register: d_vhost
-  loop: "{{ user }}"
-
-
-- debug:
-    msg: "{{ d_vhost.results[i].stat.exists }}"
-  loop: "{{ user }}"
-  loop_control:
-    index_var: i
-- name : Create a Directory for a vhost
+#- name: Check if the vhost directory exists
+#  stat:
+#    path: "/var/www/{{ directory_name }}"
+#  loop: "{{ user |  map(attribute='vhost_servername') }}"
+#  loop_control:
+#    loop_var: directory_name
+#  register: d_vhost
+- name : Create a Directory for a vhost if not exists
   file:
-    path: "/var/www/{{ item['vhost_servername'] }}"
+    path: "/var/www/vhosts/{{ item.vhost_servername }}/httpdocs"
     state: directory
     recurse: yes
-    owner: "{{ item['vhost_user'] }}"
-    group: "{{ item['vhost_group'] }}"
-  when: not d_vhost.results[i].stat.exists
+    owner: "{{ item.vhost_user }}"
+    group: "{{ item.vhost_group }}"
   loop: "{{ user }}"
-  loop_control:
-    index_var: i
+
+- file:
+    path: "/var/www/vhosts/{{ item.vhost_servername }}/logs"
+    state: directory
+    recurse: yes
+    owner: "{{ item.vhost_user }}"
+    group: "{{ item.vhost_group }}"
+  loop: "{{ user }}"
+
+
+
