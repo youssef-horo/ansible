@@ -1,0 +1,38 @@
+
+- name: Create Users for vhosts
+  include_tasks: create_user.yaml
+  when: vhost.create_vhost is defined
+  loop: "{{ vhosts }}"
+  loop_control:
+    loop_var: vhost
+
+- name: Create a Directory for the vhost
+  include_tasks: create_directory.yaml
+  when: vhost.create_vhost is defined
+  loop: "{{ vhosts }}"
+  loop_control:
+    loop_var: vhost
+
+- package_facts:
+    manager: auto
+- name: Check whether a package called apache is installed
+  debug:
+    msg: "Der {{ansible_facts.packages['apache2'][0]['name'] }} >
+    in der Version {{ansible_facts.packages['apache2'][0]['version'].split('-')[0] }} ist schon installiert "
+  when: "'apache2' in ansible_facts.packages"
+
+
+- name: Create a Vhost with a php-fpm socket
+  include_tasks: create_vhost.yaml
+  when: (vhost.enable_ssl is undefined) and (vhost.create_vhost is defined)
+  loop: "{{ vhosts }}"
+  loop_control:
+    loop_var: vhost
+
+
+- name: Create a Vhost with a lets encrypt certificate
+  include_tasks: create_vhost_with_ssl.yaml
+  when: (vhost.enable_ssl is defined) and (vhost.create_vhost is defined)
+  loop: "{{ vhosts }}"
+  loop_control:
+    loop_var: vhost

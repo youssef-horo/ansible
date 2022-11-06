@@ -1,0 +1,111 @@
+---
+#wichtig ssl,rewrite engine modul enablen
+- include_tasks: create_requirements_directorys.yaml
+- name: Check if the lets encrypt account key exists
+  stat:
+    path: "/etc/letsencrypt/{{ servername }}/account-{{ servername }}.key"
+  register: account_key
+
+- name: Generate let's encrypt account key
+  community.crypto.openssl_privatekey:
+    path: "/etc/letsencrypt/{{ servername }}/account-{{ servername }}.key"
+  when: not account_key.stat.exists
+ # loop: "{{vhosts | map(attribute='servername')}}"
+
+- name: Generate let's encrypt private key with the default values (4096 bits, RSA)
+  community.crypto.openssl_privatekey:
+    path: "/etc/letsencrypt/{{ servername }}/{{ servername }}.pem"
+  #loop: "{{vhosts | map(attribute='servername')}}"
+
+- name: Generate an OpenSSL CSR
+  community.crypto.openssl_csr:
+    path: "/etc/letsencrypt/{{ servername }}/{{ servername }}.csr"
+    privatekey_path: "/etc/letsencrypt/{{ servername }}/{{ servername }}.pem"
+    email_address: "{{ email_address }}"
+    common_name: "{{ common_name }}"
+    country_name: "{{ country_name }}"
+    organization_name: "{{ organization_name }}"
+    #subject_alt_name: "{{ [dns_name] }}"
+    subject_alt_name: "{{ dns_name | map('regex_replace', '^', 'DNS:') }}"
+    key_usage:
+      - digitalSignature
+      - keyAgreement
+    extended_key_usage:
+      #- clientAuth
+      - serverAuth
+ # loop: "{{ vhosts }}"
+
+- name: Create a challange for my domain
+  community.crypto.acme_certificate:
+    terms_agreed: yes
+    challenge: http-01
+    acme_version: 2
+    acme_directory: "https://acme-staging-v02.api.letsencrypt.org/directory"
+    #acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
+    account_key_src: "/etc/letsencrypt/{{ servername }}/account-{{ servername }}.key"
+    csr: "/etc/letsencrypt/{{ servername }}/{{ servername }}.csr"
+    dest: "/etc/letsencrypt/{{ servername }}/{{ servername }}.crt"
+    chain: "/etc/letsencrypt/{{ servername }}/{{ servername }}-chain.crt"
+    fullchain_dest: "/etc/letsencrypt/{{ servername }}/{{ servername }}-fullchain.crt"
+  #loop: "{{ vhosts }}"
+  register: my_challange
+
+
+- name: show var
+  debug:
+    msg: "das ist: {{my_challange}}"
+
+- name: blocki
+  block:
+    - name: create http-01 challenege file
+      copy:
+        dest: "/var/www/vhosts/{{servername }}/httpdocs/{{ my_challange['challenge_data'][item]['http-01']['resource'] }}"
+        content: "{{ my_challange['challenge_data'][item]['http-01']['resource_value'] }}"
+      #ignore_errors: True
+      with_items:
+        - "{{ dns_name }}"
+      when: my_challange is changed
+  rescue:
+    - debug:
+        msg: "Der item ist durchgefallen"
+
+##############
+- name: Let the challenge be validated and retrieve the cert and intermediate certificate
+  community.crypto.acme_certificate:
+    terms_agreed: yes
+    challenge: http-01
+    acme_version: 2
+    acme_directory: "https://acme-staging-v02.api.letsencrypt.org/directory"
+    #acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
+    account_key_src: "//etc/letsencrypt/{{ servername}}/account-{{ servername }}.key"
+    csr: "/etc/letsencrypt/{{ servername }}/{{ servername }}.csr"
+    #dest: "/etc/letsencrypt/{{ servername }}/{{ servername }}.crt"
+    chain: "/etc/letsencrypt/{{ servername }}/{{ servername }}-chain.crt"
+    fullchain_dest: "/etc/letsencrypt/{{ servername}}/{{ servername }}-fullchain.crt"
+    data: "{{ my_challange }}"
+  #loop: "{{ vhosts | map(attribute='servername')}}"
+  register: test1
+#- name:
+#  debug:
+#    msg: "Das ist in der var {{ test1 }}"
+
+
+- name: Add apache vhost configuration.
+  template:
+    src: "vhosts_ssl.conf.j2"
+    dest: /etc/apache2/sites-available/{{ servername }}.conf
+    owner: "www-data"
+    group: "www-data"
+    mode: 0644
+  notify:
+    - restart apache
+
+
+- name: Add vhost symlink in sites-enabled.
+  file:
+    src: /etc/apache2/sites-available/{{ servername }}.conf
+    dest: /etc/apache2/sites-enabled/{{ servername }}.conf
+    state: link
+  #  mode: "{{ vhost_mode }}"
+#  loop: "{{ vhosts |  map(attribute='servername') }}"
+

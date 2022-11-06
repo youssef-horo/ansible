@@ -1,0 +1,33 @@
+- name : Create a Directory for a vhost if not exists
+  file:
+    path: "/var/www/vhosts/{{ vhost.server_name }}/httpdocs"
+    state: directory
+    recurse: yes
+    owner: "{{ vhost.user }}"
+    group: "{{ vhost.group }}"
+
+- file:
+    path: "/var/www/vhosts/{{ vhost.server_name }}/logs"
+    state: directory
+    recurse: yes
+    owner: "{{ vhost.user }}"
+    group: "{{ vhost.group }}"
+
+- name: Create a Directory for the lets encrypt certificate
+  file:
+    path: "/etc/letsencrypt/{{ vhost.server_name }}"
+    state: directory
+    recurse: yes
+    owner: root
+    group: root
+    mode: 755
+  when: vhost.enable_ssl is defined
+
+- name: Directory for the challenge
+  file:
+    path: "/var/www/vhosts/{{ vhost.server_name }}/httpdocs/.well-known/acme-challenge"
+    state: directory
+    owner: "{{ vhost.user }}"
+    group: "{{ vhost.group }}"
+    mode: 755
+  when: vhost.enable_ssl is defined

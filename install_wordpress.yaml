@@ -1,0 +1,22 @@
+- name: install wordpress
+  hosts: plesk.yhoro.de
+  vars:
+    vhosts:
+
+      - server_name: "mx102.yhoro.org"
+        create_vhost: true
+        server_alias: "mx102.yhoro.org"
+        user: "mx102"
+        group: "admins"
+        fpm_version: "php7.4-fpm"
+        enable_ssl: true
+        email_address: "yhoro@yhoro.de"
+        common_name: "mx102.yhoro.org"
+        organization_name: "yhoro"
+        dns_name:
+          - "mx102.yhoro.org"
+
+
+
+  roles:
+    - wordpress

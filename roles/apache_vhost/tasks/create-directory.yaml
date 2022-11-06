@@ -5,22 +5,36 @@
 #  loop_control:
 #    loop_var: directory_name
 #  register: d_vhost
+
+
+#- name : Create a Directory for a vhost if not exists
+#  file:
+#    path: "/var/www/vhosts/{{ item.vhost_servername }}"
+#    state: directory
+#    recurse: yes
+#    owner: "{{ item.user }}"
+#    group: "{{ item.group }}"
+#  loop: "{{ vhosts }}"
+
+
+
+
 - name : Create a Directory for a vhost if not exists
   file:
-    path: "/var/www/vhosts/{{ item.vhost_servername }}/httpdocs"
+    path: "/var/www/vhosts/{{ item.servername }}/httpdocs"
     state: directory
     recurse: yes
-    owner: "{{ item.vhost_user }}"
-    group: "{{ item.vhost_group }}"
-  loop: "{{ user }}"
+    owner: "{{ item.user }}"
+    group: "{{ item.group }}"
+  loop: "{{ vhosts }}"
 
 - file:
-    path: "/var/www/vhosts/{{ item.vhost_servername }}/logs"
+    path: "/var/www/vhosts/{{ item.servername }}/logs"
     state: directory
     recurse: yes
-    owner: "{{ item.vhost_user }}"
-    group: "{{ item.vhost_group }}"
-  loop: "{{ user }}"
+    owner: "{{ item.user }}"
+    group: "{{ item.group }}"
+  loop: "{{ vhosts }}"
 
 
 

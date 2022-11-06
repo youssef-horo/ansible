@@ -1,0 +1,15 @@
+- name:
+  file:
+    path: "/etc/letsencrypt/{{ servername }}"
+    state: directory
+    recurse: yes
+    owner: root
+    group: root
+    mode: 755
+- name: Directory for the challenge
+  file:
+    path: "/var/www/vhosts/{{ servername }}/httpdocs/.well-known/acme-challenge"
+    state: directory
+    owner: root
+    group: root
+    mode: 755

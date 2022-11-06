@@ -18,12 +18,12 @@
 
 - name: Add apache vhost configuration. 
   template:
-    src: "vhosts.conf.j2"
-    dest: /etc/apache2/sites-available/{{ users.vhost_servername }}.conf
-    owner: "{{ vhost_user }}"
-    group: "{{ vhost_group }}"
+    src: "vhost_wordpress_ssl.conf.j2"
+    dest: /etc/apache2/sites-available/{{ users.servername }}.conf
+    owner: "www-data"
+    group: "www-data"
     mode: "{{ vhost_mode }}"
-  loop: "{{ user  }}"
+  loop: "{{ vhosts  }}"
   loop_control:
     loop_var: users
   notify:
@@ -40,18 +40,18 @@
     dest: /etc/apache2/sites-enabled/{{ item }}.conf
     state: link
   #  mode: "{{ vhost_mode }}"
-  loop: "{{ user |  map(attribute='vhost_servername') }}"
+  loop: "{{ vhosts |  map(attribute='servername') }}"
  # notify: restart apache
 
 
 - name: Add Pool Configuration for the Vhost
   template:
     src: "pool.conf.j2"
-    dest: /etc/php/{{ users.vhost_fpm_version | regex_search('[0-9]+.[0-9]+') }}/fpm/pool.d/{{ users.vhost_servername }}.conf
-    owner: "{{ users.vhost_user }}"
-    group: "{{ users.vhost_group }}"
+    dest: /etc/php/{{ users.fpm_version | regex_search('[0-9]+.[0-9]+') }}/fpm/pool.d/{{ users.servername }}.conf
+    owner: "{{ users.user }}"
+    group: "{{ users.group }}"
     mode: "{{ vhost_mode }}"
-  loop: "{{ user  }}"
+  loop: "{{ vhosts  }}"
   loop_control:
       loop_var: users
   notify:

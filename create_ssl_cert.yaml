@@ -1,0 +1,24 @@
+---
+- name: Create SSL Certificate
+  hosts: plesk.yhoro.de
+  vars:
+    servername: "test.yhoro.de"
+    user: "BP-pleski"
+    group: "{{ vhosts_group }}"
+    serveralias: "test.yhoro.de"
+    php_version: "php7.4"
+    fpm_version: "php7.4-fpm"
+    email_address: "yhoro@yhoro.de"
+    country_name: "DE"
+    common_name: "test.yhoro.de"
+    organization_name: "Horo GmbH"
+    organizational_unit_name: "keine ahnung"
+    dns_name:
+      - "test.yhoro.de"
+      - "www.yhoro.de"
+
+
+
+  roles:
+    #- apache_vhost
+    - ssl_certificate

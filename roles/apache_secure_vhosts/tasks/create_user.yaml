@@ -1,60 +1,13 @@
-#- name:  listen definieren
-#  set_fact:
-#    useradd: []
-#    failed : []
-#    preuseradd: []
-#    toaddeduser: []
 
-#- name: Add all username to a list
-#  set_fact:
-#    toaddeduser: "{{ toaddeduser + [ user[i]['vhost_user'] ] }}"
-#  loop: "{{ user }}"
-#  loop_control:
-#    index_var: i
 
-#- name: Die liste der User in passwd holen
-#  getent:
-#    database: passwd
-#  register: passwd
-############################
-
-#- name: ein vergleich
-#  set_fact:
-#    useradd:  "{{ useradd +  [ item[0] | string]  }}"
-#  with_nested:
-#    - "{{ toaddeduser }}"
-#    - "{{ ansible_facts.getent_passwd }}"
-#  when: item[0] == item[1]
-#  register: user_exist
-
-#- name:
-#  debug:
-#    msg: "Diese Benutzer sind schon auf dem Zielsystem vorhanden :  {{ useradd }} "
-#  when: user_exist is not skipped
-## nur die User,  die nicht vorhanden sind in einer Liste hinzufügen
-#- name:
-#  set_fact:
-#    toaddeduser: "{{ toaddeduser | difference(useradd) }}"
-
-# in einem block packen und für den fall dass es changed erfolgreich added
 - name: Add a system_user
   user:
-    name: "{{ item['user'] }}"
-    group: "{{ item['group'] }}"
+    name: "{{ vhost['user'] }}"
+    group: "{{ vhost['group'] }}"
     groups: "www-data"
-    home: "/var/www/vhosts/{{ item['servername']}}/"
+    home: "/var/www/vhosts/{{ vhost['server_name']}}/"
     shell: /usr/sbin/nologin
-   #umask: 0027 # eventuell die other lesen geben also die 0022
-  loop: "{{ vhosts }}"
-  #loop_control:
-   # index_var: i
- # when: item['vhost_user'] in toaddeduser
- # register: result_adduser
 
-#- debug:
-#    msg: "das ist attribute :{{ toaddeduser }}"#
-#  when: result_adduser.changed
-#  loop: "{{ result_adduser.results | map(attribute='name') }}"
 
 
 

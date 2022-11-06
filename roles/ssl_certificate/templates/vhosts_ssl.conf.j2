@@ -1,0 +1,60 @@
+<VirtualHost *:80>
+    Alias /.well-known/acme-challenge/ /var/www/vhosts/{{ servername }}/httpdocs/.well-known/acme-challenge/
+    <Directory "/var/www/vhosts/{{ servername }}/httpdocs/.well-known/acme-challenge/">
+        Options None
+        AllowOverride None
+        ForceType text/plain
+        RedirectMatch 404 "^(?!/\.well-known/acme-challenge/[\w-]{43}$)"
+    </Directory>
+
+    RewriteEngine On
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R=301,L]
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName {{ servername }}
+{% if serveralias is defined %}
+    ServerAlias {{ serveralias }}
+{% else %}
+    ServerAlias {{ servername }}
+{% endif %}
+
+{% if documentroot is defined %}
+    DocumentRoot "{{ documentroot }}"
+{% else %}
+    DocumentRoot "/var/www/vhosts/{{ servername }}/httpdocs"
+{% endif %}
+
+
+	ErrorLog "/var/www/vhosts/{{ servername }}/logs/apache_error.log"
+    CustomLog /var/www/vhosts/{{ servername }}/logs/access.log combined
+
+
+	SSLEngine on
+	SSLCertificateFile /etc/letsencrypt/{{ servername }}/{{ servername }}-fullchain.crt
+	SSLCertificateKeyFile /etc/letsencrypt/{{ servername }}/{{ servername }}.pem
+
+{% if fpm_version is defined %}
+<Proxy "unix:/var/run/php/{{ fpm_version }}-{{ servername }}.sock|fcgi://localhost">
+{% else %}
+<Proxy "unix:/var/run/php/php7.4-fpm-{{ servername }}.sock|fcgi://localhost">
+{% endif %}
+   ProxySet timeout=300
+</Proxy>
+
+
+
+<FilesMatch \.php$>
+   SetHandler "proxy:fcgi://localhost"
+</FilesMatch>
+
+
+  <Directory "/var/www/vhosts/{{ servername }}/httpdocs">
+    AllowOverride All
+    Options Indexes FollowSymLinks
+    Require all granted
+  </Directory>
+
+</VirtualHost>
+

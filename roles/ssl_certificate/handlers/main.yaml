@@ -1,0 +1,9 @@
+- name:
+  command: apachectl configtest
+  register: apache_conftest
+  listen: restart apache
+- service:
+    name: "apache2"
+    state: "restarted"
+  when: apache_conftest is succeeded
+  listen: restart apache

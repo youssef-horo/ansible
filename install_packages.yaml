@@ -20,6 +20,7 @@
       #- nano
       #- test
       - net-tools
-      - php8.0
+      #- php8.0
   roles:
+    - apache2
     - apt_install

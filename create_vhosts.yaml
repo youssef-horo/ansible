@@ -2,18 +2,19 @@
 - name: try to create on or more vhosts
   hosts: plesk.yhoro.de
   vars:
-    user:
-      - vhost_user: "BP-555"
-        vhost_group: "{{ vhosts_group }}"
-        vhost_servername: "info.yhoro.de"
-        vhost_alias: "info.yhoro.org"
-        vhost_fpm_version: "php7.4-fpm"
+    vhosts:
+      - user: "BP-13dd7"
+        group: "{{ vhosts_group }}"
+        servername: "test.yhoro.de"
+        serveralias: "test.yhoro.org"
+        php_version: "php7.4"
+        fpm_version: "php7.4-fpm"
 
-      - vhost_user: "BP-333"
-        vhost_group: "{{ vhosts_group }}"
-        vhost_servername: "eu.yhoro.de"
-        vhost_alias: "eu.yhoro.de"
-        vhost_fpm_version: "php8.0-fpm"
+    #  - vhost_user: "BP-333"
+     #   vhost_group: "{{ vhosts_group }}"
+      #  vhost_servername: "eu.yhoro.de"
+      #  vhost_alias: "eu.yhoro.de"
+      #  vhost_fpm_version: "php8.0-fpm"
   roles:
-    - apache2
+    #- apache2
     - apache_vhost

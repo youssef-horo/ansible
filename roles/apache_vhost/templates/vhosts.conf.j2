@@ -1,53 +1,44 @@
 <VirtualHost {{ vhost_listen_ip }}:{{ vhost_listen_port }}>
-    ServerName {{ users.vhost_servername }}
-{% if users.vhost_serveralias is defined %}
-    ServerAlias {{ users.vhost_serveralias }}
+    ServerName {{ users.servername }}
+{% if users.serveralias is defined %}
+    ServerAlias {{ users.serveralias }}
 {% else %}
-    ServerAlias {{ users.vhost_servername }}
+    ServerAlias {{ users.servername }}
 {% endif %}
-{% if users.vhost_documentroot is defined %}
-    DocumentRoot "{{ users.vhost_documentroot }}"
+{% if users.documentroot is defined %}
+    DocumentRoot "{{ users.documentroot }}"
 {% else %}
-    DocumentRoot "/var/www/vhosts/{{ users.vhost_servername }}/httpdocs"
-{% endif %}
-
-{% if users.vhost_serveradmin is defined %}
-  ServerAdmin {{ users.vhost_serveradmin }}
+    DocumentRoot "/var/www/vhosts/{{ users.servername }}/httpdocs"
 {% endif %}
 
-    ErrorLog "/var/www/vhosts/{{ users.vhost_servername }}/logs/apache_error.log"
-    CustomLog /var/www/vhosts/{{ users.vhost_servername }}/logs/access.log combined
+{% if users.serveradmin is defined %}
+  ServerAdmin {{ users.serveradmin }}
+{% endif %}
 
-{% if users.vhost_fpm_version is defined %}
-<Proxy "unix:/var/run/php/{{ users.vhost_fpm_version }}-{{ users.vhost_servername }}.sock|fcgi://localhost">
+    ErrorLog "/var/www/vhosts/{{ users.servername }}/logs/apache_error.log"
+    CustomLog /var/www/vhosts/{{ users.servername }}/logs/access.log combined
+
+{% if users.fpm_version is defined %}
+<Proxy "unix:/var/run/php/{{ users.fpm_version }}-{{ users.servername }}.sock|fcgi://localhost">
 {% else %}
-<Proxy "unix:/var/run/php/php7.4-fpm-{{ users.vhost_servername }}.sock|fcgi://localhost">
+<Proxy "unix:/var/run/php/php7.4-fpm-{{ users.servername }}.sock|fcgi://localhost">
 {% endif %}
    ProxySet timeout=300
 </Proxy>
 
-#<FilesMatch ".php$">
-#<If "-f %{SCRIPT_FILENAME}">
-#    {% if users.vhost_fpm_version is defined %}
-#    SetHandler "proxy:unix:/run/php/{{ users.vhost_fpm_version }}-{{ users.vhost_servername }}.sock| fcgi://localhost/"
-#    {% else %}#
-#	SetHandler "proxy:unix:/run/php/php7.4-fpm-{{ users.vhost_servername }}.sock|fcgi://localhost"
-#	{% endif %}
-#</If>
-#</FilesMatch>
 
 
 <FilesMatch \.php$>
    SetHandler "proxy:fcgi://localhost"
 </FilesMatch>
 
-  <Directory "/var/www/vhosts/{{ users.vhost_servername }}/httpdocs">
+  <Directory "/var/www/vhosts/{{ users.servername }}/httpdocs">
     AllowOverride {{ vhost_allow_override | default(vhost_allow_override) }}
     Options {{ vhost_options | default(vhost_options) }}
     Require all granted
   </Directory>
-{% if users.vhost_extra_parameters is defined %}
-{{ users.vhost_extra_parameters | indent(width=2, first=True) }}
+{% if users.extra_parameters is defined %}
+{{ users.extra_parameters | indent(width=2, first=True) }}
 {% endif %}
 </VirtualHost>
 

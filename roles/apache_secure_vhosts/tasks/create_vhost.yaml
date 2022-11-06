@@ -1,0 +1,43 @@
+
+- name: Remove default vhost in sites-enabled.
+  file:
+    path: "/etc/apache2/sites-enabled/{{ apache_default_vhost_filename }}"
+    state: absent
+
+- name: Add apache vhost configuration.
+  template:
+    src: "vhost.conf.j2"
+    dest: /etc/apache2/sites-available/{{ vhost.server_name }}.conf
+    owner: "www-data"
+    group: "www-data"
+    mode: "{{ vhost_mode }}"
+  notify:
+  - restart apache
+
+- name: Add vhost symlink in sites-enabled.
+  file:
+    src: /etc/apache2/sites-available/{{ vhost.server_name }}.conf
+    dest: /etc/apache2/sites-enabled/{{ vhost.server_name }}.conf
+    state: link
+  notify: restart apache
+
+- name: Add Pool Configuration for the Vhost
+  template:
+    src: "pool.conf.j2"
+    dest: /etc/php/{{ vhost.fpm_version | regex_search('[0-9]+.[0-9]+') }}/fpm/pool.d/{{ vhost.server_name }}.conf
+    owner: "{{ vhost.user }}"
+    group: "{{ vhost.group }}"
+    mode: "{{ vhost_mode }}"
+  notify:
+  - restart apache
+  - restart fpm
+
+- name: copy index.php to test the configuration
+  copy:
+    src: "files/index.php"
+    dest: "/var/www/vhosts/{{ vhost.server_name }}/httpdocs"
+    owner: "{{ vhost.user }}"
+    group: "{{ vhost.group }}"
+
+
+

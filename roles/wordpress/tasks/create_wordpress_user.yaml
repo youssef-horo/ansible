@@ -1,0 +1,7 @@
+- name: Add a system_user
+  user:
+    name: "{{ vhost['user'] }}"
+    group: "{{ vhost['group'] }}"
+    groups: "www-data"
+    home: "/var/www/vhosts/{{ vhost['server_name']}}/"
+    shell: /usr/sbin/nologin

@@ -1,0 +1,13 @@
+- name: create a Database for wordpress
+  mysql_db:
+    name: wp_{{ vhost.server_name | regex_replace('\.', '_') }}
+
+# habe hier ein gehaschtes password benutzet
+- name: create a user for php
+  mysql_user:
+    name: wp_{{ vhost.server_name | regex_replace('\.', '_') }}_user
+    host: localhost
+    password: '*0F3704CF78312459ABAEBE40557BFF7BFCB0A3EC'
+    encrypted: yes
+    priv: wp_{{ vhost.server_name | regex_replace('\.', '_') }}.*:ALL,GRANT
+    state: present

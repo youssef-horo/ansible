@@ -1,0 +1,33 @@
+# Bitte die variable create_vhost setzen um einen vhost zu erstellen
+
+- name: create a secure vhost
+  hosts: plesk.yhoro.de
+  vars:
+    vhosts:
+      - server_name: "mx01.yhoro.org"
+        server_alias: "mx01.yhoro.org"
+        user: "mx01"
+        group: "admins"
+        fpm_version: "php7.4-fpm"
+
+      - server_name: "mx02.yhoro.org"
+        server_alias: "mx02.yhoro.org"
+        user: "mx02"
+        group: "admins"
+        fpm_version: "php7.4-fpm"
+
+      - server_name: "mx03.yhoro.org"
+        server_alias: "mx03.yhoro.org"
+        user: "mx03"
+        group: "admins"
+        fpm_version: "php7.4-fpm"
+        enable_ssl: true
+        email_address: "yhoro@yhoro.de"
+        common_name: "mx03.yhoro.org"
+        organization_name: "yhoro"
+        dns_name:
+          - "mx03.yhoro.org"
+
+
+  roles:
+    - apache_secure_vhosts

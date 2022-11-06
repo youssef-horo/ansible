@@ -1,0 +1,75 @@
+<VirtualHost {{ vhost_listen_ip }}:{{ vhost_listen_port }}>
+    ServerName {{ vhost.server_name }}
+{% if vhost.server_alias is defined %}
+    ServerAlias {{ vhost.server_alias }}
+{% else %}
+    ServerAlias {{ vhost.server_name }}
+{% endif %}
+{% if vhost.documentroot is defined %}
+    DocumentRoot "{{ vhost.documentroot }}"
+{% else %}
+    DocumentRoot "/var/www/vhosts/{{ vhost.server_name }}/httpdocs"
+{% endif %}
+
+{% if vhost.server_admin is defined %}
+  ServerAdmin {{ vhost.server_admin }}
+{% endif %}
+
+    ErrorLog "/var/www/vhosts/{{ vhost.server_name }}/logs/apache_error.log"
+    CustomLog /var/www/vhosts/{{ vhost.server_name }}/logs/access.log combined
+
+{% if vhost.fpm_version is defined %}
+<Proxy "unix:/var/run/php/{{ vhost.fpm_version }}-{{ vhost.user }}.sock|fcgi://localhost">
+{% else %}
+<Proxy "unix:/var/run/php/php7.4-fpm-{{ vhost.user }}.sock|fcgi://localhost">
+{% endif %}
+   ProxySet timeout=300
+</Proxy>
+
+
+
+<FilesMatch \.php$>
+   SetHandler "proxy:fcgi://localhost"
+</FilesMatch>
+
+  <Directory "/var/www/vhosts/{{ vhost.server_name }}/httpdocs">
+    AllowOverride {{ vhost.allow_override | default(vhost_allow_override) }}
+    Options {{ vhost.options | default(vhost_options) }}
+    Require all granted
+  </Directory>
+{% if vhost.extra_parameters is defined %}
+{{ vhost.extra_parameters | indent(width=2, first=True) }}
+{% endif %}
+</VirtualHost>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

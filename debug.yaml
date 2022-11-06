@@ -1,0 +1,20 @@
+---
+- name: Für Testzwecken
+  hosts: plesk.yhoro.de
+  vars:
+    vhosts:
+      - name: "youssef"
+        nachname: "horo"
+        nummer: 1233
+        dns_name:
+          - haha
+          - testi
+        enable_ssl: true
+      - name: "merve"
+        nachname: "atik"
+        nummer: 432
+        dns_name:
+          - www.yhoro.de
+          - test.yhoro.de
+  roles:
+    - debugen

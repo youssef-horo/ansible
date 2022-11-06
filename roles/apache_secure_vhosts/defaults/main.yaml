@@ -7,8 +7,7 @@ vhost_listen_port_ssl: 443
 
   #apache_create_vhosts: true
 
-vhost_user: www-data
-vhost_group: www-data
+
 vhost_mode: 0644
 apache_global_vhost_settings: |
   DirectoryIndex index.php index.html

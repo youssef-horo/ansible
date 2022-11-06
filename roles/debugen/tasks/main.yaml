@@ -1,0 +1,5 @@
+- include_tasks: include.yaml
+  when: vhost.enable_ssl is defined
+  loop: "{{ vhosts }}"
+  loop_control:
+    loop_var: vhost

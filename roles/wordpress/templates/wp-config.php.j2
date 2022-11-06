@@ -20,10 +20,10 @@
 
 // ** Database settings - You can get this info from your web host ** //
 /** The name of the database for WordPress */
-define( 'DB_NAME', 'wp_{{ item | regex_replace('\.', '_')  }}' );
+define( 'DB_NAME', 'wp_{{ vhost.server_name | regex_replace('\.', '_')  }}' );
 
 /** Database username */
-define( 'DB_USER', 'wp_{{ item | regex_replace('\.', '_')  }}_user' );
+define( 'DB_USER', 'wp_{{ vhost.server_name | regex_replace('\.', '_')  }}_user' );
 
 /** Database password */
 define( 'DB_PASSWORD', 'Pa$$w0rd' );

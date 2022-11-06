@@ -1,0 +1,10 @@
+- name: test wie die loops funktionert
+  debug:
+    msg: "Das ist ein name {{ vhost.name }} und das ist item.dns_name {{ vhost.dns_name }}"
+
+- name: test wie ein innloop geht
+  debug:
+    msg: "Das ist in der loop {{ i }}"
+  loop: "{{ vhost.dns_name }}"
+  loop_control:
+    loop_var: i
