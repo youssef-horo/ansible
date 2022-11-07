@@ -5,6 +5,7 @@
     recurse: yes
     owner: "{{ vhost.user }}"
     group: "{{ vhost.group }}"
+    mode: 755
 
 - file:
     path: "/var/www/vhosts/{{ vhost.server_name }}/logs"
@@ -12,6 +13,7 @@
     recurse: yes
     owner: "{{ vhost.user }}"
     group: "{{ vhost.group }}"
+    mode: 755
 
 - name: Create a Directory for the lets encrypt certificate
   file:

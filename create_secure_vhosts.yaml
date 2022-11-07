@@ -28,6 +28,19 @@
         dns_name:
           - "mx03.yhoro.org"
 
+      - server_name: "mx04.yhoro.org"
+        create_vhost: true
+        server_alias: "mx04.yhoro.org"
+        user: "mx04"
+        group: "admins"
+        fpm_version: "php7.4-fpm"
+        enable_ssl: true
+        email_address: "yhoro@yhoro.de"
+        common_name: "mx04.yhoro.org"
+        organization_name: "yhoro"
+        dns_name:
+          - mx04.yhoro.org
+
 
   roles:
     - apache_secure_vhosts

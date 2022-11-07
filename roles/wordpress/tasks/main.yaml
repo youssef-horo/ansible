@@ -1,8 +1,8 @@
-- include_tasks: create_wordpress_user.yaml
-  when: vhost.create_vhost is defined
-  loop: "{{ vhosts }}"
-  loop_control:
-    loop_var: vhost
+#- include_tasks: create_wordpress_user.yaml
+#  when: vhost.create_vhost is defined
+#  loop: "{{ vhosts }}"
+#  loop_control:
+#    loop_var: vhost
 
 - include_tasks: configure_mariadb.yaml
   when: vhost.create_vhost is defined
@@ -10,11 +10,28 @@
   loop_control:
     loop_var: vhost
 
-- include_tasks: create_directorys.yaml
-  when: vhost.create_vhost is defined
-  loop: "{{ vhosts }}"
-  loop_control:
-    loop_var: vhost
+#- include_tasks: create_directorys.yaml
+#  when: vhost.create_vhost is defined
+#  loop: "{{ vhosts }}"
+#  loop_control:
+#    loop_var: vhost
+
+
+
+
+#- include_tasks: create_non_ssl_vhost.yaml
+#  when: (vhost.enable_ssl is undefined) and (vhost.create_vhost is defined)
+#  loop: "{{vhosts }}"
+#  loop_control:
+#    loop_var: vhost
+
+
+
+# include_tasks: create_letsencrypt_certificate.yaml
+#  when: (vhost.enable_ssl is defined) and (vhost.create_vhost is defined)
+#  loop: "{{vhosts }}"
+#  loop_control:
+ #   loop_var: vhost
 
 - name: copy wordpress to DokumeentRoot
   copy:
@@ -30,6 +47,8 @@
   loop_control:
     loop_var: vhost
 
+
+
 - name:
   template:
     src: "wp-config.php.j2"
@@ -41,20 +60,12 @@
   loop: "{{ vhosts }}"
   loop_control:
     loop_var: vhost
-
-- include_tasks: create_letsencrypt_certificate.yaml
-  when: (vhost.enable_ssl is defined) and (vhost.create_vhost is defined)
-  loop: "{{vhosts }}"
-  loop_control:
-    loop_var: vhost
+  notify:
+    - restart apache
 
 
 
-- include_tasks: create_non_ssl_vhost.yaml
-  when: (vhost.enable_ssl is undefined) and (vhost.create_vhost is defined)
-  loop: "{{vhosts }}"
-  loop_control:
-    loop_var: vhost
+
 
 
 

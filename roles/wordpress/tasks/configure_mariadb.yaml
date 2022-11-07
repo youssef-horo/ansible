@@ -3,7 +3,7 @@
     name: wp_{{ vhost.server_name | regex_replace('\.', '_') }}
 
 # habe hier ein gehaschtes password benutzet
-- name: create a user for php
+- name: create a user for wordpress
   mysql_user:
     name: wp_{{ vhost.server_name | regex_replace('\.', '_') }}_user
     host: localhost
