@@ -1,3 +1,6 @@
 [webserver]
 db01.horo.de
 plesk.yhoro.de
+
+[deb12]
+deb12-db01 cert=true
